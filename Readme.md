@@ -46,7 +46,7 @@ This Terraform repository provisions a **multi-region WordPress deployment on AW
    Navigate into each environment folder and run:
    ```bash
    terraform init
-   terraform apply -auto-approve
+   terraform apply
    ```
    This deploys the region-specific infrastructure and outputs ALB DNS, S3 bucket info, etc.
 
@@ -57,7 +57,7 @@ This Terraform repository provisions a **multi-region WordPress deployment on AW
    Run in the global folder:
    ```bash
    terraform init
-   terraform apply -var-file="terraform.tfvars" -auto-approve
+   terraform apply -var-file="terraform.tfvars"
    ```
    This provisions CloudFront, Lambda@Edge geo-routing, and WAF if enabled.
 
