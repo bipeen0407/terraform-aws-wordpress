@@ -75,6 +75,17 @@ variable "aurora_master_password" {
   sensitive   = true
 }
 
+variable "db_master_username" {
+  description = "Master username for the Aurora cluster"
+  type        = string
+}
+
+variable "db_name" {
+  description = "Name of the database created in the Aurora cluster"
+  type        = string
+
+}
+
 # ----------------------
 # S3 CRR
 # ----------------------

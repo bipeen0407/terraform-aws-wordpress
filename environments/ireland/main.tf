@@ -80,8 +80,8 @@ module "iam" {
 # -------------------------------------------------
 module "ec2_asg" {
   source                = "../../modules/ec2_asg"
-  ami_id                = var.ami_id        # TODO: Provide AMI ID
-  instance_type         = var.instance_type # TODO: Provide instance type
+  ami_id                = var.ami_id
+  instance_type         = var.instance_type
   private_subnet_ids    = module.vpc.private_subnet_ids
   instance_profile_name = module.iam.wordpress_instance_profile_name
   db_secret_arn         = module.aurora.db_secret_arn
@@ -143,8 +143,8 @@ module "aurora" {
   db_engine             = "aurora-mysql"
   engine_version        = "8.0.mysql_aurora.3.04.0"
   instance_class        = "db.r6g.large"
-  db_name               = "wordpress"
-  db_master_username    = "wpadmin"
+  db_name               = var.db_name
+  db_master_username    = var.db_master_username
   cluster_identifier    = "${var.environment}-aurora"
   environment           = var.environment
   enable_global_cluster = true
