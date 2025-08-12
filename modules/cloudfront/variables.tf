@@ -1,25 +1,48 @@
-variable "origin_domain_name" {
-  description = "The domain name of the origin, e.g., your S3 bucket regional domain"
+variable "origins" {
+  description = "List of origins with domain, origin_id, OAC, and optional custom config"
+  type = list(object({
+    domain_name              = string
+    origin_id                = string
+    origin_access_control_id = string
+    custom_origin_config = optional(object({
+      http_port              = number
+      https_port             = number
+      origin_protocol_policy = string
+      origin_ssl_protocols   = list(string)
+    }))
+  }))
+}
+
+variable "default_cache_behavior_origin_id" {
+  description = "Origin ID for default cache behavior"
   type        = string
 }
 
-variable "lambda_version_arn" {
-  description = "The ARN of the published Lambda@Edge function version to associate"
-  type        = string
-}
-
-variable "lambda_association_event_type" {
-  description = "CloudFront event type to trigger Lambda@Edge function (e.g., origin-request)"
-  type        = string
-  default     = "origin-request"
+variable "ordered_cache_behaviors" {
+  description = "List of additional cache behaviors for routing by path patterns"
+  type = list(object({
+    path_pattern             = string
+    target_origin_id         = string
+    allowed_methods          = list(string)
+    cached_methods           = list(string)
+    viewer_protocol_policy   = string
+    lambda_function_arn      = string
+    lambda_association_event = string
+    query_string_forward     = bool
+    cookies_forward          = string
+    min_ttl                  = number
+    default_ttl              = number
+    max_ttl                  = number
+  }))
+  default = []
 }
 
 variable "waf_web_acl_arn" {
-  description = "ARN of the WAF Web ACL to associate with the CloudFront distribution"
+  description = "ARN of the WAF Web ACL"
   type        = string
 }
 
 variable "environment" {
-  description = "Environment tag for resource tagging"
+  description = "Environment tag for resources"
   type        = string
 }
