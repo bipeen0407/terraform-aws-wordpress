@@ -1,0 +1,9 @@
+---
+region: eu-west-1                                   # AWS region
+ami_base: ami-01776cde0c6f0677c                    # Base AMI for the t2.micro (Amazon Linux 2023)
+instance_type: t2.micro
+key_name: ansible                    # Your SSH key pair name
+ami_name: "custom-wordpress-ami-{{ lookup('pipe', 'date +%Y%m%d%H%M%S') }}"
+ssh_user: ec2-user                                  # User to SSH (Amazon Linux 2)
+ssh_private_key: /home/ubuntu/.ssh/ansible.pem                # Private key file path for SSH
+

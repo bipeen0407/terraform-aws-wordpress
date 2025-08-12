@@ -1,0 +1,67 @@
+---
+- name: Install Apache, PHP, and required PHP modules
+  yum:
+    name:
+      - httpd
+      - php
+      - php-mysqlnd
+      - php-gd
+      - php-xml
+      - php-mbstring
+    state: present
+  become: true
+
+- name: Start and enable Apache web server
+  service:
+    name: httpd
+    state: started
+    enabled: yes
+  become: true
+
+- name: Download the latest WordPress release
+  get_url:
+    url: https://wordpress.org/latest.tar.gz
+    dest: /tmp/latest.tar.gz
+  become: true
+
+- name: Extract WordPress files into the web root
+  unarchive:
+    src: /tmp/latest.tar.gz
+    dest: /var/www/html/
+    remote_src: yes
+    extra_opts: [--strip-components=1]
+  become: true
+
+- name: Set ownership of WordPress files to apache user
+  file:
+    path: /var/www/html
+    state: directory
+    recurse: yes
+    owner: apache
+    group: apache
+  become: true
+
+- name: Create uploads directory with full permissions
+  file:
+    path: /var/www/html/wp-content/uploads
+    state: directory
+    mode: '0777'
+    owner: apache
+    group: apache
+  become: true
+
+# Optional: Mount EFS if heretofore enabled
+- name: Mount EFS to uploads directory (optional)
+  mount:
+    path: /var/www/html/wp-content/uploads
+    src: "{{ efs_id }}:/"
+    fstype: efs
+    opts: tls,_netdev
+    state: mounted
+  become: true
+  when: efs_id is defined and efs_id != ""
+
+- name: Copy generic WordPress wp-config.php template without sensitive data
+  template:
+    src: wp-config.php.j2
+    dest: /var/www/html/wp-config.php

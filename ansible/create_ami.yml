@@ -1,0 +1,105 @@
+---
+- name: Build WordPress AMI - Launch EC2 instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - vars.yml
+
+  tasks:
+
+    - name: Launch EC2 instance with minimal bootstrap user data
+      amazon.aws.ec2_instance:
+        key_name: "{{ key_name }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_base }}"
+        region: "{{ region }}"
+        wait: yes
+        user_data: |
+          #!/bin/bash
+          # Basic bootstrap: update and install core packages to speed up Ansible later
+          sudo yum update -y
+          sudo yum install -y httpd php mariadb-server php-mysqlnd
+          sudo systemctl enable httpd
+          sudo systemctl start httpd
+        network:
+          assign_public_ip: yes
+        tags:
+          Name: wordpress-ami-builder
+      register: ec2_instance_info
+
+    # - name: Debug EC2 instance info
+    #   debug:
+    #     var: ec2_instance_info
+
+    - name: Set facts about launched EC2 instance for subsequent plays
+      set_fact:
+        instance_id: "{{ ec2_instance_info.instance_ids[0] }}"
+        public_ip: "{{ ec2_instance_info.instances[0].public_ip_address }}"
+        private_ip: "{{ ec2_instance_info.instances[0].private_ip_address }}"
+
+    - name: Wait for SSH port to be open on the new EC2 instance
+      wait_for:
+        host: "{{ public_ip }}"
+        port: 22
+        timeout: 300
+        state: started
+        delay: 30  # Initial delay before checking availability
+
+    - name: Dynamically add launched EC2 instance to inventory for configuration
+      add_host:
+        name: wordpress-build-instance
+        ansible_host: "{{ public_ip }}"
+        ansible_user: "{{ ssh_user }}"
+        ansible_ssh_private_key_file: "{{ ssh_private_key }}"
+        ansible_python_interpreter: /usr/bin/python3
+        ansible_connection: ssh
+      changed_when: false
+
+
+- name: Configure WordPress environment on the build EC2 instance
+  hosts: wordpress-build-instance
+  gather_facts: yes
+  become: true
+
+  roles:
+    - configure_wordpress_environment
+
+
+- name: Create AMI from configured EC2 instance and terminate build instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  vars_files:
+    - vars.yml
+
+  tasks:
+
+    - name: Create AMI from build instance
+      amazon.aws.ec2_ami:
+        instance_id: "{{ instance_id }}"
+        name: "{{ ami_name }}"
+        wait: yes
+        wait_timeout: 600
+        region: "{{ region }}"
+        tags:
+          Purpose: "WordPress Base AMI"
+          CreatedBy: "Ansible"
+          BaseAMI: "{{ ami_base }}"
+      register: ami_info
+
+    - name: Display created AMI ID
+      debug:
+        msg: "Successfully created WordPress AMI ID: {{ ami_info.image_id }}"
+
+    - name: Terminate the EC2 build instance to avoid charges
+      amazon.aws.ec2_instance:
+        instance_ids:
+          - "{{ instance_id }}"
+        region: "{{ region }}"
+        state: absent
+        wait: yes
+
+    # - name: Optional - Clean up dynamic host facts from inventory
+    #   meta: clear_host_facts
+    #   when: hostvars['wordpress-build-instance'] is defined
