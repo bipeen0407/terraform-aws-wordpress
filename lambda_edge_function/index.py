@@ -21,9 +21,9 @@ def lambda_edge_routing(event: Dict) -> Dict:
 
     # Define weighted routing logic
     if country_code == 'IE':
-        region = 'Ireland' if rand_val < 0.3 else 'Singapore'
+        region = 'Ireland' if rand_val < 0.95 else 'Singapore'
     elif country_code == 'SG':
-        region = 'Singapore' if rand_val < 0.6 else 'Ireland'
+        region = 'Singapore' if rand_val < 0.95 else 'Ireland'
     else:
         region = 'Ireland' if rand_val < 0.5 else 'Singapore'
 
