@@ -13,7 +13,7 @@ This Terraform repository provisions a **multi-region WordPress deployment on AW
   - EFS, ElastiCache, Aurora Database
   - S3 bucket with cross-region replication
   - CloudFront CDN with Lambda@Edge
-  - (Optional) WAF for web protection
+  - WAF for web protection
 
 - `envs/irl-dev/` — Terraform configuration for Ireland region environment
 - `envs/sgp-dev/` — Terraform configuration for Singapore region environment
@@ -33,7 +33,7 @@ This Terraform repository provisions a **multi-region WordPress deployment on AW
 
 - Terraform
 - AWS CLI configured with appropriate permissions
-- IAM roles for Lambda@Edge in `us-east-1`
+- IAM roles for Lambda@Edge
 - An S3 bucket for Terraform remote state (recommended) with DynamoDB locking (recommended)
 - ACM certificates for ALB HTTPS (optional but recommended)
 
@@ -59,7 +59,7 @@ This Terraform repository provisions a **multi-region WordPress deployment on AW
    terraform init
    terraform apply -var-file="terraform.tfvars"
    ```
-   This provisions CloudFront, Lambda@Edge geo-routing, and WAF if enabled.
+   This provisions CloudFront, Lambda@Edge geo-routing, and WAF.
 
 ## Helpful Commands
 

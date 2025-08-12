@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // Adjust AWS credentials bindings or environment variables as per your setup
+        // Adjust AWS credentials bindings or environment variables as per setup
         AWS_ACCESS_KEY_ID     = credentials('aws-access-key-id')
         AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key')
         AWS_DEFAULT_REGION    = 'eu-west-1'
@@ -12,7 +12,7 @@ pipeline {
     stages {
         stage('Checkout') {
             steps {
-                // Checkout your Terraform code from Git
+                // Checkout Terraform code from Git
                 // assuming the repository is set up correctly so that it can pull the code
                 git url: 'https://your.git.repo/terraform-aws-wordpress.git', branch: 'main'
             }
