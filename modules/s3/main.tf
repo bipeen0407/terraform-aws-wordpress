@@ -77,11 +77,11 @@ resource "aws_s3_bucket_policy" "cloudfront_oac_policy" {
         }
         Action   = "s3:GetObject"
         Resource = "${aws_s3_bucket.this.arn}/*"
-        Condition = {
+        Condition = var.cloudfront_distribution_arn != "" ? {
           StringEquals = {
             "AWS:SourceArn" = var.cloudfront_distribution_arn
           }
-        }
+        } : null
       }
     ]
   })

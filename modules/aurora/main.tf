@@ -54,3 +54,7 @@ resource "aws_rds_cluster_instance" "reader" {
   publicly_accessible  = false
   db_subnet_group_name = aws_rds_subnet_group.aurora.name
 }
+
+data "aws_secretsmanager_secret" "db_master_password_secret" {
+  name = "rds/${aws_rds_cluster.this.cluster_identifier}/${aws_rds_cluster.this.master_username}"
+}
