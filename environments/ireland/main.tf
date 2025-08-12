@@ -1,3 +1,12 @@
+provider "aws" {
+  alias  = "ireland"
+  region = "eu-west-1"
+}
+
+provider "aws" {
+  alias  = "global"
+  region = "us-east-1" # For global resources like Lambda@Edge, WAF
+}
 
 # -------------------------------------------------
 # 1. VPC Setup
@@ -37,7 +46,7 @@ module "nat_gateway" {
 module "security_groups" {
   source               = "../../modules/security_groups"
   vpc_id               = module.vpc.vpc_id
-  private_subnet_cidrs = var.private_subnet_cidrs
+  private_subnet_cidrs = var.private_subnets
   environment          = var.environment
 
   providers = {
@@ -142,7 +151,7 @@ module "aurora" {
   aurora_security_group = module.security_groups.aurora_sg_id
   db_engine             = "aurora-mysql"
   engine_version        = "8.0.mysql_aurora.3.04.0"
-  instance_class        = "db.r6g.large"
+  instance_class        = var.instance_class #"db.r6g.large"
   db_name               = var.db_name
   db_master_username    = var.db_master_username
   cluster_identifier    = "${var.environment}-aurora"
@@ -169,3 +178,42 @@ module "s3" {
     aws = aws.ireland
   }
 }
+
+module "waf" {
+  source = "../../modules/waf"
+
+  waf_name          = "wordpress-waf-${var.environment}"
+  environment       = var.environment
+  rate_limit        = 2000 #block or throttle requests from clients that exceed 2,000 requests within a predefined time window
+  blocked_countries = []
+  providers = {
+    aws = aws.global
+  }
+
+}
+
+resource "aws_cloudfront_origin_access_control" "oac" {
+  name                              = "${var.environment}-oac"
+  description                       = "OAC for CloudFront to access S3 bucket"
+  origin_access_control_origin_type = "s3"
+  signing_protocol                  = "sigv4"
+  signing_behavior                  = "always"
+}
+module "cloudfront" {
+  source = "../../modules/cloudfront"
+
+  origins = [
+    {
+      domain_name              = module.s3.bucket_regional_domain_name
+      origin_id                = "ireland-s3-origin"
+      origin_access_control_id = aws_cloudfront_origin_access_control.oac.id
+    },
+    # Add ALB origins here as needed
+  ]
+
+  default_cache_behavior_origin_id = "ireland-s3-origin"
+
+  web_acl_id  = module.waf.web_acl_id
+  environment = var.environment
+}
+

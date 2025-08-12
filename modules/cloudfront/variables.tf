@@ -37,8 +37,8 @@ variable "ordered_cache_behaviors" {
   default = []
 }
 
-variable "waf_web_acl_arn" {
-  description = "ARN of the WAF Web ACL"
+variable "web_acl_id" {
+  description = "WAF Web ACL ID to associate with CloudFront"
   type        = string
 }
 

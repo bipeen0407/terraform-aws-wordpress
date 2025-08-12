@@ -33,8 +33,6 @@ resource "aws_route" "public_internet_access" {
   route_table_id         = aws_route_table.public.id
   destination_cidr_block = "0.0.0.0/0"
   gateway_id             = var.internet_gateway_id
-
-  depends_on = [aws_internet_gateway.gw]
 }
 
 # Associate public route table with all public subnets

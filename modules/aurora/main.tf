@@ -1,5 +1,5 @@
 # Aurora Subnet Group (spans private subnets in multiple AZs)
-resource "aws_rds_subnet_group" "aurora" {
+resource "aws_db_subnet_group" "aurora" {
   name        = "${var.environment}-aurora-subnet-group"
   subnet_ids  = var.private_subnet_ids
   description = "Aurora Subnet Group"
@@ -21,7 +21,7 @@ resource "aws_rds_cluster" "this" {
   database_name               = var.db_name
   manage_master_user_password = true
   master_username             = var.db_master_username
-  db_subnet_group_name        = aws_rds_cluster_instance.aurora.name
+  db_subnet_group_name        = aws_db_subnet_group.aurora.name
   vpc_security_group_ids      = [var.aurora_security_group]
   storage_encrypted           = true
   skip_final_snapshot         = true
@@ -42,7 +42,7 @@ resource "aws_rds_cluster_instance" "writer" {
   engine              = var.db_engine
   publicly_accessible = false
   # Place writer in first subnet/AZ
-  db_subnet_group_name = aws_rds_subnet_group.aurora.name
+  db_subnet_group_name = aws_db_subnet_group.aurora.name
 }
 
 resource "aws_rds_cluster_instance" "reader" {
@@ -52,7 +52,7 @@ resource "aws_rds_cluster_instance" "reader" {
   instance_class       = var.instance_class
   engine               = var.db_engine
   publicly_accessible  = false
-  db_subnet_group_name = aws_rds_subnet_group.aurora.name
+  db_subnet_group_name = aws_db_subnet_group.aurora.name
 }
 
 data "aws_secretsmanager_secret" "db_master_password_secret" {

@@ -1,11 +1,11 @@
 # Create Origin Access Control
-resource "aws_cloudfront_origin_access_control" "oac" {
-  name                              = "${var.environment}-oac"
-  description                       = "OAC for CloudFront to access S3 bucket"
-  origin_access_control_origin_type = "s3"
-  signing_protocol                  = "sigv4"
-  signing_behavior                  = "always"
-}
+# resource "aws_cloudfront_origin_access_control" "oac" {
+#   name                              = "${var.environment}-oac"
+#   description                       = "OAC for CloudFront to access S3 bucket"
+#   origin_access_control_origin_type = "s3"
+#   signing_protocol                  = "sigv4"
+#   signing_behavior                  = "always"
+# }
 
 resource "aws_cloudfront_distribution" "this" {
   enabled = true
@@ -75,7 +75,7 @@ resource "aws_cloudfront_distribution" "this" {
     }
   }
 
-  web_acl_id = var.waf_web_acl_arn
+  web_acl_id = var.web_acl_id
 
   price_class = "PriceClass_100"
 

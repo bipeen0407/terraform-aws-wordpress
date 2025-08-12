@@ -22,17 +22,6 @@ variable "azs" {
   type        = list(string)
 }
 
-# These are required separately for the SG module
-variable "public_subnet_cidrs" {
-  description = "List of Public Subnet CIDR blocks (for SG rules)"
-  type        = list(string)
-}
-
-variable "private_subnet_cidrs" {
-  description = "List of Private Subnet CIDR blocks (for SG rules)"
-  type        = list(string)
-}
-
 # ----------------------
 # Environment Info
 # ----------------------
@@ -69,12 +58,6 @@ variable "instance_type" {
 # Aurora / RDS
 # ----------------------
 
-variable "aurora_master_password" {
-  description = "Master password for Aurora cluster"
-  type        = string
-  sensitive   = true
-}
-
 variable "db_master_username" {
   description = "Master username for the Aurora cluster"
   type        = string
@@ -82,6 +65,11 @@ variable "db_master_username" {
 
 variable "db_name" {
   description = "Name of the database created in the Aurora cluster"
+  type        = string
+
+}
+variable "instance_class" {
+  description = "Instance class for the Aurora cluster"
   type        = string
 
 }
@@ -93,6 +81,7 @@ variable "db_name" {
 variable "sgp_bucket_arn" {
   description = "Destination bucket ARN in Singapore for cross-region replication"
   type        = string
+  default     = ""
 }
 
 variable "s3_replication_role_arn" {
@@ -114,15 +103,6 @@ variable "db_secret_arn" {
 # Lambda@Edge
 # ----------------------
 
-variable "lambda_zip_file_path" {
-  description = "Path to the deployment package ZIP file for Lambda@Edge function"
-  type        = string
-}
-
-variable "lambda_function_name" {
-  description = "Name of the Lambda@Edge function"
-  type        = string
-}
 
 variable "lambda_handler" {
   description = "Lambda function entry point handler"
@@ -136,10 +116,6 @@ variable "lambda_runtime" {
   default     = "python3.9"
 }
 
-variable "lambda_role_arn" {
-  description = "IAM Role ARN for Lambda@Edge execution"
-  type        = string
-}
 
 # ----------------------
 # CloudFront and WAF
@@ -167,19 +143,8 @@ variable "default_cache_behavior_origin_id" {
   default     = ""
 }
 
-variable "lambda_version_arn" {
-  description = "Published Lambda@Edge function version ARN"
-  type        = string
-}
-
 variable "lambda_association_event_type" {
   description = "CloudFront event type to trigger Lambda@Edge function"
   type        = string
   default     = "origin-request"
 }
-
-variable "waf_web_acl_arn" {
-  description = "ARN of the WAF Web ACL to associate with CloudFront"
-  type        = string
-}
-
