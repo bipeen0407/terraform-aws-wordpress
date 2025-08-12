@@ -36,7 +36,7 @@ resource "aws_iam_instance_profile" "wordpress_instance_profile" {
 
 # IAM Role for Lambda@Edge Execution
 resource "aws_iam_role" "lambda_edge_execution" {
-  name = "${var.environment}-lambda-edge-execution-role"
+  name = "lambda-edge-execution-role"
 
   assume_role_policy = jsonencode({
     Version = "2012-10-17"

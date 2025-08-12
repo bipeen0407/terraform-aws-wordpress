@@ -18,8 +18,3 @@ resource "aws_lambda_function" "this" {
   }
 }
 
-resource "aws_lambda_version" "current" {
-  function_name = aws_lambda_function.this.function_name
-  depends_on    = [aws_lambda_function.this]
-}
-
